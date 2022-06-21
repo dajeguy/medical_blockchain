@@ -10,6 +10,7 @@ import * as crypto from 'crypto';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { TextDecoder } from 'util';
+import express from 'express';
 
 const channelName = envOrDefault('CHANNEL_NAME', 'mychannel');
 const chaincodeName = envOrDefault('CHAINCODE_NAME', 'basic');
@@ -70,32 +71,40 @@ async function main(): Promise<void> {
         const contract = network.getContract(chaincodeName);
 
         // Initialize a set of asset data on the ledger using the chaincode 'InitLedger' function.
-        await initLedger(contract);
+        //await initLedger(contract);
 
         // Return all the current assets on the ledger.
-        await getAllAssets(contract);
+        //await getAllAssets(contract);
 
         // Create a new asset on the ledger.
-        await createAsset(contract);
+        //await createAsset(contract);
 
         // Update an existing asset asynchronously.
-        await transferAssetAsync(contract);
+        //await transferAssetAsync(contract);
 
         // Get the asset details by assetID.
-        await readAssetByID(contract);
+        //await readAssetByID(contract);
 
         // Update an asset which does not exist.
-        await updateNonExistentAsset(contract)
+        //await updateNonExistentAsset(contract)
+        const app = express();
+        const port = 3000;
+        app.get('/', (req, res) => {
+          res.send('The server is working!');
+        });
+        app.listen(port, () => {
+          if (port === 3000) {
+            console.log('true')
+          }
+          console.log(`server is listening on ${port} !!!`);
+});
     } finally {
         gateway.close();
         client.close();
     }
 }
 
-main().catch(error => {
-    console.error('******** FAILED to run the application:', error);
-    process.exitCode = 1;
-});
+
 
 async function newGrpcConnection(): Promise<grpc.Client> {
     const tlsRootCert = await fs.readFile(tlsCertPath);
