@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {AssetTransferContract} from './assetTransfer';
+import {MedicalRecordSharingContract} from './medicalRecordSharing';
 
-export {AssetTransferContract} from './assetTransfer';
+export {MedicalRecordSharingContract} from './medicalRecordSharing';
 
-export const contracts: any[] = [AssetTransferContract];
+export const contracts: any[] = [MedicalRecordSharingContract];

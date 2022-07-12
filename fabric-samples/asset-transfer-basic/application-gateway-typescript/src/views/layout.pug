@@ -1,0 +1,85 @@
+doctype html
+html(lang='en' style="height:100%;")
+  head
+    title= title
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js')
+    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    script.
+      function uploadData(){
+        alert("開始執行");
+          $.ajax({
+              url:'/catalog/uploadData',
+              async: false,
+              method:'POST',
+              timeout:30000,
+              data:{InExecution:'true'},
+              success: function(result){
+                var data = $.parseJSON(result);
+                if(data.InExecution == 'false'){
+                  alert("執行完成!");
+                }
+              },
+              error: function (jqXHR, exception){
+                  var msg = '';
+                  if (jqXHR.status === 0) {
+                      msg = 'Not connect.\n Verify Network.';
+                  } else if (jqXHR.status == 404) {
+                      msg = 'Requested page not found. [404]';
+                  } else if (jqXHR.status == 500) {
+                      msg = 'Internal Server Error [500].';
+                  } else if (exception === 'parsererror') {
+                      msg = 'Requested JSON parse failed.';
+                  } else if (exception === 'timeout') {
+                      msg = 'Time out error.';
+                  } else if (exception === 'abort') {
+                      msg = 'Ajax request aborted.';
+                  } else {
+                      msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                  }
+                  alert(msg);
+              }
+          });
+      }
+      $(document).ready(function(){
+          $.post("/checkPermission", {}, function(res){
+            //console.log(res);
+            if(res != "T"){
+              $('#uploadlink').parent().remove();
+            }
+          });
+      });
+  body(style="height:100%;")
+    div(class='container-fluid')
+      div(class='row')
+        div(class='col-sm-2 col-xs-2 col-md-2' style="height:100vh;background:#FFFFDE;")
+          block sidebar
+            form(method='POST' action='/logout')
+              ul(class='sidebar-nav')
+                li 
+                  a(href='/catalog') 首頁
+                li 
+                  a(href='/catalog/medicalrecords') 電子病歷查詢
+                li 
+                  a(href='/catalog/healthreport') 健檢報告查詢
+                li 
+                  a(href='/catalog/medicalreport') 醫療報告查詢
+                li 
+                  a(href='/catalog/consultation_process') 看診進度查詢
+                li 
+                  hr
+                li 
+                  a(href='/medicalrecord/create') 填寫電子病歷
+                li 
+                  a(href='/catalog/appointment') 預約看診
+                li
+                  a(onclick='uploadData()', id="uploadlink", href='#') 上傳醫院病歷至區塊鏈
+                li
+                  br
+                  button.btn.btn-primary(type='submit') 登出
+                
+        div(class='col-sm-10 col-xs-10 col-md-10' style="height:100vh; background:#F2FFFF;")
+          block content
