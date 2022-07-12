@@ -2,38 +2,311 @@ extends layout
 
 block content
   h1= title
+  script.
+    $(document).ready(function(){
+        var func1 = function(val){
+           var selDivision =  document.getElementById('division');
+           selDivision.innerHTML = '';
+           $.ajax({
+                url:'/getDivision',
+                type:'POST',
+                async: true,
+                cache:false,
+                data:{clinicId:val},
+                success:function(res){
+                  console.log("ajax 完成");
+                  console.log(res);
+                  var data = $.parseJSON(res);
+                  if(data.divisions && data.divisions.length > 0){
+                    data.divisions.sort(function(a, b) {let textA = a.Did.toUpperCase(); let textB = b.Did.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+                    var sel =  document.getElementById('division');
+                    sel.innerHtml = '';
+                    for(var i = 0; i< data.divisions.length; i++){
+                      var option = document.createElement('option');
+                      option.innerHTML = data.divisions[i].DName;
+                      option.value = data.divisions[i].Did;
+                      sel.appendChild(option);
+                    }
+                    func2(val, data.divisions[0].Did);
+                  }
+                 else
+                 {
+                    var sel =  document.getElementById('division');
+                    var option = document.createElement('option');
+                    option.innerHTML = "請選擇看診科別";
+                    option.value = '';
+                    sel.appendChild(option);
+                  }
+                  var text = $('#division option:selected').text();
+                  $('#divisionname').val(text);
+                },
+                error:function(jqXHR, exception){
+                    alert("取得部門資料時發生錯誤!");
+                }
+            });
+        }
+        var func2 = function(clinicId, val){
+          var selDoctor =  document.getElementById('doctor');
+           selDoctor.innerHTML = '';
+           $.ajax({
+                url:'/getDoctor',
+                type:'POST',
+                async: true,
+                cache:false,
+                data:{clinicId:clinicId, divisionId:val},
+                success:function(res){
+                  console.log("ajax 完成");
+                  console.log(res);
+                  var data = $.parseJSON(res);
+                  if(data.doctors && data.doctors.length > 0){
+                    data.doctors.sort(function(a, b) {let textA = a.Name.toUpperCase(); let textB = b.Name.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+                    var sel =  document.getElementById('doctor');
+                    sel.innerHtml= '';
+                    for(var i = 0; i< data.doctors.length; i++){
+                      var option = document.createElement('option');
+                      option.innerHTML = data.doctors[i].Name;
+                      option.value = data.doctors[i]._id;
+                      sel.appendChild(option);
+                    }
+                  }
+                 else
+                 {
+                    var sel =  document.getElementById('doctor');
+                    var option = document.createElement('option');
+                    option.innerHTML = "請選擇看診醫師";
+                    option.value = '';
+                    sel.appendChild(option);
+                  }
+                  var text = $('#doctor option:selected').text();
+                  $('#doctorname').val(text);
+                },
+                error:function(jqXHR, exception){
+                    alert("取得醫師資料時發生錯誤!");
+                }
+            });
+        }
+        var selClinic =  document.getElementById('clinic');
+        if(selClinic){
+          var text = $('#clinic option:selected').text();
+          $('#clinicname').val(text);
+          func1(selClinic.value);
+          $('#clinic').change(function(e){
+              var val = e.currentTarget.value;
+              console.log(val);
+              var text = $('#clinic option:selected').text();
+              $('#clinicname').val(text);
+              func1(val);
+          });
+        }
 
+        var selDivision = document.getElementById('division');
+        if(selDivision){
+          func2(selClinic.value, selDivision.value);
+          $('#division').change(function(e){
+              var clinicId = $('#clinic').val();
+              var val = e.currentTarget.value;
+              console.log(val);
+              var text = $('#division option:selected').text();
+              $('#divisionname').val(text);
+              func2(clinicId, val);
+          });
+        }
+        var selDoctor = document.getElementById('doctor');
+        if(selDoctor){
+          $('#doctor').change(function(e){
+              var text = $('#doctor option:selected').text();
+              $('#doctorname').val(text);
+          });
+        }
+    });
   form(method='POST' action='')
-    div.form-group
-      label(for='title') Title:
-      input#title.form-control(type='text', placeholder='Name of book' name='title' required='true' value=(undefined===book ? '' : book.title) )
-    div.form-group
-      label(for='author') Author:
-      select#author.form-control(type='select', placeholder='Select author' name='author' required='true' )
-        - authors.sort(function(a, b) {let textA = a.family_name.toUpperCase(); let textB = b.family_name.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
-        for author in authors
-          if book
-            option(value=author._id selected=( author._id.toString()==book.author._id
-                || author._id.toString()==book.author ? 'selected' : false) ) #{author.name}
+    div(style="height:300vh;")
+      div.form-group
+          div(class="row")
+            div(class="col-md-6 col-xs-6 col-sm-6")
+               label 姓名:&nbsp;
+               span.
+                #{pdata.Name}
+            div(class="col-md-3 col-xs-3 col-sm-3")
+               label 出生年月日:&nbsp;
+               span.
+                #{pdata.Birth}
+            div(class="col-md-3 col-xs-3 col-sm-3")
+               label 身份證字號:&nbsp;
+               span.
+                #{pdata.Pid}
+      div.form-group
+          div(class="row")
+            div(class="col-md-6 col-xs-6 col-sm-6")
+               label 職業:&nbsp;
+               span.
+                #{pdata.JobType}
+            div(class="col-md-3 col-xs-3 col-sm-3")
+               label 性別:&nbsp;
+                if pdata.Sex == 'M'
+                 span.
+                  男性
+                else
+                 span.
+                  女性
+            div(class="col-md-3 col-xs-3 col-sm-3")
+               label 血型:&nbsp;
+               span.
+                #{pdata.BloodType} 型
+      div.form-group
+          div(class="row")
+            div(class="col-md-6 col-xs-6 col-sm-6")
+               label(for='name') 聯絡地址:&nbsp;
+               span.
+                #{pdata.Address}
+            div(class="col-md-6 col-xs-6 col-sm-6")
+               label(for='name') 聯絡電話:&nbsp;
+               span.
+                #{pdata.Phone}
+      div.form-group
+        div(class="row")
+          div(class="col-md-6 col-xs-6 col-sm-6")
+             label 電子信箱:&nbsp;
+             span.
+              #{pdata.Email}
+      div.form-group
+        div(class='row')
+          div(class="col-sm-4 col-md-4")
+            label(for='consultation_date') 看診日期:
+            if mode == 'Update'
+              label &nbsp;#{existedMedicaRecord.ConsultationDate}
+            else
+              input#consultation_date.form-control(type='date' name='consultation_date' required='true' placeholder='dd/mm/yyyy' value=('') )
+      div.form-group
+            div(class="row")
+              div(class="col-md-6 col-xs-3 col-sm-6")
+                label(for='clinic') 看診院所:
+                if mode == 'Update'
+                  label &nbsp;#{existedMedicaRecord.Clinic}
+                else
+                  select#clinic.form-control(type='select', placeholder='請選擇看診院所' name='clinic' required='true' )
+                    - clinics.sort(function(a, b) {let textA = a.Hid.toUpperCase(); let textB = b.Hid.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+                    for clinic in clinics
+                        option(value=clinic.Hid) #{clinic.Name}
+                  input(style='display:none;',name='clinicname',id='clinicname')
+              div(class="col-md-3 col-xs-3 col-sm-3")
+                label(for='division') 看診科別:
+                if mode == 'Update'
+                  label &nbsp;#{existedMedicaRecord.CDvin}
+                else
+                  select#division.form-control(type='select', placeholder='請選擇看診科別'  name='division' required='true' )
+                    option(value='') 請選擇看診科別
+                  input(style='display:none;',name='divisionname',id='divisionname')
+              div(class="col-md-3 col-xs-3 col-sm-3")
+                label(for='doctor') 看診醫師:
+                if mode == 'Update'
+                  label &nbsp;#{existedMedicaRecord.Doctor}
+                else
+                  select#doctor.form-control(type='select', placeholder='請選擇看診醫師'  name='doctor' required='true' )
+                    option(value='') 請選擇看診醫師
+                  input(style='display:none;',name='doctorname',id='doctorname')
+      div.form-group
+        div(class='row')
+          div(class="col-sm-8 col-md-8")
+            label(for='description') 諮詢原因:
+            if mode == 'Update'
+              label &nbsp;#{existedMedicaRecord.Description}
+            else
+              textarea#description.form-control(type='textarea', placeholder='看診目的' name='description' rows='3' ) #{undefined===existedMedicaRecord ? '' : existedMedicaRecord.Description}
+      - for (var i = 0; i< investigations.length; i++){
+          div.form-group
+            label #{investigations[i].Description}:
+              if investigations[i].Type == 'Checkbox' && investigations[i].Setting != ''
+                - var settingArr = investigations[i].Setting.split('/');
+                - var edited = undefined===existedMedicaRecord ? null : existedMedicaRecord.Options.filter(function(item){ return item.Key == investigations[i].ClassID });
+                if mode == 'Update'
+                  span
+                    label &nbsp;#{edited[0].Value}
+                     if edited[0].Comment != ''
+                      span.
+                        ,&nbsp;#{edited[0].Comment}
+                else
+                  div
+                    - for (var j = 0; j < settingArr.length; j++) {
+                        div(style='display: inline; padding-right:10px;')
+                          input.checkbox-input(type='checkbox', name=(investigations[i].ClassID), id=(investigations[i].ClassID), value=(settingArr[j]), checked=(edited ? edited[0].Value == settingArr[j] : false ))
+                          label(for=(investigations[i].ClassID)) #{settingArr[j]}
+                    - }
+                    if investigations[i].HasComment == "Y"
+                      input(type="text", name=(investigations[i].ClassID+'_Comment') placeholder=(investigations[i].PlaceHolder) value=(edited ? edited[0].Comment : ""))
+              else if investigations[i].Type == 'Radio' && investigations[i].Setting == ''
+                - var edited = undefined===existedMedicaRecord ? null : existedMedicaRecord.Options.filter(function(item){ return item.Key == investigations[i].ClassID });
+                if mode == 'Update'
+                  span
+                     label &nbsp;#{edited[0].Value}
+                     if edited[0].Comment != ''
+                      span.
+                        ,&nbsp;#{edited[0].Comment}
+                else
+                  div
+                    div(style='display: inline; padding-right:10px;')
+                      input.radio-input(type='radio', name=(investigations[i].ClassID), id=(investigations[i].ClassID), value=('否'), checked=(edited ? edited[0].Value == '否' : true))
+                      label(for=(investigations[i].ClassID)) 否
+                    div(style='display: inline; padding-right:10px;')
+                      input.radio-input(type='radio', name=(investigations[i].ClassID), id=(investigations[i].ClassID), value=('是'), checked=(edited ? edited[0].Value == '是' : false))
+                      label(for=(investigations[i].ClassID)) 是
+                    if investigations[i].HasComment == "Y"
+                      input(type="text", name=(investigations[i].ClassID +'_Comment') placeholder=(investigations[i].PlaceHolder) value=(edited ? edited[0].Comment : ""))
+              else if investigations[i].Type == 'Radio' && investigations[i].Setting != ''
+                 - var radioSettingArr = investigations[i].Setting.split('/');
+                 - var edited = undefined===existedMedicaRecord ? null : existedMedicaRecord.Options.filter(function(item){ return item.Key == investigations[i].ClassID });
+                  if mode == 'Update'
+                    span
+                     label &nbsp;#{edited[0].Value}
+                      if edited[0].Comment != ''
+                        span.
+                          ,&nbsp;#{edited[0].Comment}
+                  else
+                    div
+                     - for (var j = 0; j < radioSettingArr.length; j++) {
+                        div(style='display: inline; padding-right:10px;')
+                          - var isChecked = j == 0 ? true : false;
+                          - isChecked = edited ? edited[0].Value == radioSettingArr[j] : isChecked;
+                          input.radio-input(type='radio', name=(investigations[i].ClassID), id=(investigations[i].ClassID), value=(radioSettingArr[j]), checked=(isChecked))
+                          label(for=(investigations[i].ClassID)) #{radioSettingArr[j]}
+                          if investigations[i].HasComment == "Y"
+                            input(type="text", name=(investigations[i].ClassID +'_Comment') placeholder=(investigations[i].PlaceHolder) value=(edited ? edited[0].Comment : ""))
+                     - }
+
+      - }
+      if mode == 'Update'
+       div(class="form-group")
+        if Identity == 'Med' && IsAdmin == 'F'
+          label(for='doctor-comment') 醫師診斷:
+          if undefined!==existedMedicaRecord
+            - for (var i in existedMedicaRecord.DoctorComment)
+              div(class="form-group")
+                span #{existedMedicaRecord.DoctorComment[i].Comment}
+                br
+                span(style="font-size: 10px; color: #464646;") #{existedMedicaRecord.DoctorComment[i].Clinic},#{existedMedicaRecord.DoctorComment[i].Division},#{existedMedicaRecord.DoctorComment[i].Doctor}&nbsp;&nbsp;#{existedMedicaRecord.DoctorComment[i].CommentDate}
+
+          textarea#doctor-comment.form-control(type='textarea', placeholder='醫師的診斷說明' name='doctorcomment' rows='3' )
+        else
+          label(for='doctor-comment') 醫師診斷:
+          if undefined!==existedMedicaRecord
+            if existedMedicaRecord.DoctorComment == null || existedMedicaRecord.DoctorComment.length == 0
+              p (尚未有診斷結果)
+            else
+              - for (var i in existedMedicaRecord.DoctorComment)
+                div(class="form-group")
+                  span #{existedMedicaRecord.DoctorComment[i].Comment}
+                  br
+                  span(style="font-size: 10px; color: #464646;") #{existedMedicaRecord.Clinic},#{existedMedicaRecord.CDvin},#{existedMedicaRecord.Doctor}&nbsp;&nbsp;#{existedMedicaRecord.DoctorComment[i].CommentDate}
           else
-            option(value=author._id) #{author.name}
-    div.form-group
-      label(for='summary') Summary:
-      textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' rows='3' required='true') #{undefined===book ? '' : book.summary}
-    div.form-group
-      label(for='isbn') ISBN:
-      input#isbn.form-control(type='text', placeholder='ISBN13' name='isbn' value=(undefined===book ? '' : book.isbn) required='true') 
-    div.form-group
-      label Genre:
-      div
-        for genre in genres
-          div(style='display: inline; padding-right:10px;')
-            input.checkbox-input(type='checkbox', name='genre', id=genre._id, value=genre._id, checked=genre.checked )
-            label(for=genre._id) #{genre.name}
-    button.btn.btn-primary(type='submit') Submit
+             p (尚未有診斷結果)
+
+      if mode == 'Update'
+        if Identity == 'Med' && IsAdmin == 'F'
+          button#update.btn.btn-primary(type='submit') 更新
+      else
+        button#create.btn.btn-primary(type='submit') 送出
 
   if errors 
     ul
       for error in errors
         li!= error.msg
-  

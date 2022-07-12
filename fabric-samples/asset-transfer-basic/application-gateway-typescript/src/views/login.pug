@@ -11,7 +11,7 @@ block content
             h1(class=h1Classes) 醫療通資訊整合平台
             div.form-group
               label(for='selIdentity') 請選擇身份:
-              select#selIdentity.form-control(type='select', placeholder='選擇身份' name='Identity' required='true' )
+              select#selIdentity.form-control(type='select', placeholder='選擇身份' name='identity' required='true' )
                 option(value="Normal") 一般民眾
                 option(value="Med") 醫護人員
             //-input account
@@ -27,11 +27,15 @@ block content
             div(class=divClasses)
                 label
                     input(type="checkbox" value="remember-me")
-                    span &nbsp;記住我
+                    span &nbsp;記住我 &nbsp;
+                    input(type="button" value="註冊" class="btn btn-info btn-sm")
+                    span.
+                     &nbsp;
+                    input(type="button" value="忘記密碼" class="btn btn-warning btn-sm")
 
             //-signIn button
-            - var buttonClass=['btn', 'btn-lg', 'btn-primary', 'btn-block'];
-            button(class=buttonClass type="submit") 登入
+            - var buttonClass1=['btn', 'btn-lg', 'btn-primary', 'btn-block'];
+            button(class=buttonClass1 type="submit") 登入
 
             - var pClasses=['mt-5', 'mb-3', 'text-muted'];
             p(class=pClasses) &copy; Medical blockchain 2022

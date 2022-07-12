@@ -17,7 +17,7 @@ block content
   div(class="row")
     div(class="col-sm-9 col-xs-9 col-md-9")
       h1= title
-      p 歡迎使用 #[em 醫療通], 您可由此平台來獲取電子病歷資訊,醫療報告以及預約看診
+      p 歡迎使用 #[em 醫療通], 您可由此平台來獲取電子病歷資訊,醫療報告以及使用預約看診服務
 
       h1 資訊看板
 
@@ -27,11 +27,13 @@ block content
         p 項目:
 
         ul
-          li #[strong 電子病歷:] !{data.book_count}
+          li #[strong 電子病歷:] 
+            a(href="/catalog/medicalrecords") #{data.record_count}
           li #[strong 健檢報告:] 0
+          li #[strong 醫療報告:] 0
     div(class="col-sm-3 col-xs-3 col-md-3")
       br
-      div 歡迎 #[strong !{data.login_user}] !{data.user_title} 登入
+      span 歡迎 #[strong !{data.login_user}] !{data.user_title} 登入
       br
       div 現在時間 : 
           span(id="datetime_now") 

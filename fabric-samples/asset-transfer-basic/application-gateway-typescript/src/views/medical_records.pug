@@ -2,13 +2,232 @@ extends layout
 
 block content
   h1= title
-  
-  ul
-    - book_list.sort(function(a, b) {let textA = a.title.toUpperCase(); let textB = b.title.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
-    each book in book_list
-      li 
-        a(href=book.url) #{book.title} 
-        |  (#{book.author.name})
+  style.
+    #tblRecord > tr > th{
+      white-space:nowrap;
+    }
+  script.
+    var selClinicVal = '#{queryParams.ClinicId}';
+    var selDivisionVal = '#{queryParams.DivisionId}';
+    var selDoctorVal = '#{queryParams.DoctorId}';
+    var selConsultationDateVal = '#{queryParams.ConsultationDate}';
+    //console.log(selClinicVal);
+    //console.log(selDivisionVal);
+    //console.log(selDoctorVal);
+    $(document).ready(function(){
+        var func1 = function(val){
+           var selDivision =  document.getElementById('division');
+           selDivision.innerHTML = '';
+           $.ajax({
+                url:'/getDivision',
+                type:'POST',
+                async: true,
+                cache:false,
+                data:{clinicId:val},
+                success:function(res){
+                  //console.log("ajax 完成");
+                  //console.log(res);
+                  var data = $.parseJSON(res);
+                  if(data.divisions && data.divisions.length > 0){
+                    data.divisions.sort(function(a, b) {let textA = a.Did.toUpperCase(); let textB = b.Did.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+                    var sel =  document.getElementById('division');
+                    sel.innerHTML = '';
+                    var option = document.createElement('option');
+                    option.innerHTML = "請選擇看診科別";
+                    option.value = '';
+                    sel.appendChild(option);
+                    var valueIncluded = false;
+                    for(var i = 0; i< data.divisions.length; i++){
+                      var option = document.createElement('option');
+                      option.innerHTML = data.divisions[i].DName;
+                      option.value = data.divisions[i].Did;
+                      if(option.value == selDivisionVal){
+                        valueIncluded = true;
+                      }
+                      sel.appendChild(option);
+                    }
+                    if(selDivisionVal !=null && valueIncluded){
+                      selDivision.value = selDivisionVal;
+                      func2(val, selDivision.value !=''? selDivision.value : 'nope');
+                    }
+                  }
+                 else
+                 {
+                    var sel =  document.getElementById('division');
+                    var option = document.createElement('option');
+                    option.innerHTML = "請選擇看診科別";
+                    option.value = '';
+                    sel.appendChild(option);
+                    func2(val, 'nope');
+                  }
+                },
+                error:function(jqXHR, exception){
+                    alert("取得部門資料時發生錯誤!");
+                }
+            });
+        }
+        var func2 = function(clinicId, val){
+          var selDoctor =  document.getElementById('doctor');
+           selDoctor.innerHTML = '';
+           $.ajax({
+                url:'/getDoctor',
+                type:'POST',
+                async: true,
+                cache:false,
+                data:{clinicId:clinicId, divisionId:val},
+                success:function(res){
+                  //console.log("ajax 完成");
+                  //console.log(res);
+                  var data = $.parseJSON(res);
+                  if(data.doctors && data.doctors.length > 0){
+                    data.doctors.sort(function(a, b) {let textA = a.Name.toUpperCase(); let textB = b.Name.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+                    var sel =  document.getElementById('doctor');
+                    sel.innerHTML= '';
+                    var option = document.createElement('option');
+                    option.innerHTML = "請選擇看診醫師";
+                    option.value = '';
+                    sel.appendChild(option);
+                    var valueIncluded = false;
+                    for(var i = 0; i< data.doctors.length; i++){
+                      var option = document.createElement('option');
+                      option.innerHTML = data.doctors[i].Name;
+                      option.value = data.doctors[i]._id;
+                      if(option.value == selDoctorVal){
+                        valueIncluded = true;
+                      }
+                      sel.appendChild(option);
+                    }
+                    if(selDoctorVal != null && valueIncluded){
+                      sel.value = selDoctorVal;
+                    }
+                  }
+                 else
+                 {
+                    var sel =  document.getElementById('doctor');
+                    var option = document.createElement('option');
+                    option.innerHTML = "請選擇看診醫師";
+                    option.value = '';
+                    sel.appendChild(option);
+                  }
+                },
+                error:function(jqXHR, exception){
+                    alert("取得醫師資料時發生錯誤!");
+                }
+            });
+        }
+        var selClinic =  document.getElementById('clinic');
+        if(selClinic){
+          if(selClinicVal != null && selClinicVal != ''){
+            selClinic.value = selClinicVal;
+          }
+          func1(selClinic.value);
+          $('#clinic').change(function(e){
+              var val = e.currentTarget.value;
+              //console.log(val);
+              func1(val);
+          });
+        }
 
-    else
-      li There are no books.
+        var selDivision = document.getElementById('division');
+        if(selDivision){
+          func2(selClinic.value, selDivision.value != '' ? selDivision.value : 'nope');
+          $('#division').change(function(e){
+              var clinicId = $('#clinic').val();
+              var val = e.currentTarget.value;
+              //console.log(val);
+              func2(clinicId, val != '' ? val : 'nope');
+          });
+        }
+        var $selConsultationDate = $('#consultation_date');
+        if($selConsultationDate && (selConsultationDateVal != null && selConsultationDateVal != '')){
+          $selConsultationDate.val(selConsultationDateVal);
+        }
+        $('[id^="delBtn_"]').on('click', function(){
+            debugger;
+            var recordId = $(this).attr("data-id");
+            console.log(recordId);
+            var submitForm = document.createElement('form');
+            submitForm.method = 'POST';
+            submitForm.action = "/medicalrecord/delete";
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = "deletingId";
+            input.value = recordId;
+            submitForm.appendChild(input);
+            document.body.appendChild(submitForm);
+            submitForm.submit();
+        });
+
+    });
+  br
+  div
+    - records.sort(function(a, b) {return (a.ID < b.ID) ? -1 : (a.ID > b.ID) ? 1 : 0; });
+      .container-fluid
+          form(method="POST" action="")
+            div(class="form-group")
+              div(class="row")
+                if Identity == 'Med'
+                  div(class="col-md-3 col-xs-3 col-sm-3")
+                     label 姓名:&nbsp;
+                      input.form-control(type='text' name='name'  placeholder='輸入諮詢者/病人姓名' value=(queryParams.Name) )
+                  div(class="col-md-3 col-xs-3 col-sm-3")
+                     label 健保卡號:&nbsp;
+                      input.form-control(type='text' name='hcardid'  placeholder='輸入健保卡號' value=(queryParams.HcardId) )
+                  div(class="col-md-3 col-xs-3 col-sm-3")
+                     label 身份證字號:&nbsp;
+                      input.form-control(type='text' name='pid'  placeholder='輸入身份證號' value=(queryParams.Pid) )
+                div(class="col-md-3 col-xs-3 col-sm-3")
+                   input(class="btn btn-success btn-sm" type='submit' name='search' value=('搜尋') )
+              div
+                br
+              div.form-group
+                div(class="row")
+                  div(class="col-md-3 col-xs-3 col-sm-6")
+                    label(for='clinic') 看診院所:
+                      select#clinic.form-control(type='select', placeholder='請選擇看診院所' name='clinic' )
+                        option(value='') 請選擇看診院所
+                        - clinics.sort(function(a, b) {let textA = a.Hid.toUpperCase(); let textB = b.Hid.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+                        for clinic in clinics
+                            option(value=clinic.Hid) #{clinic.Name}
+                  div(class="col-md-3 col-xs-3 col-sm-3")
+                    label(for='division') 看診科別:
+                      select#division.form-control(type='select', placeholder='請選擇看診科別'  name='division' )
+                        option(value='') 請選擇看診科別
+                  div(class="col-md-3 col-xs-3 col-sm-3")
+                    label(for='doctor') 看診醫師:
+                      select#doctor.form-control(type='select', placeholder='請選擇看診醫師'  name='doctor' )
+                        option(value='') 請選擇看診醫師
+              div.form-group
+                div(class='row')
+                  div(class="col-sm-4 col-md-4")
+                    label(for='consultation_date') 看診日期:
+                      input#consultation_date.form-control(type='date' name='consultation_date' placeholder='dd/mm/yyyy' value=('') )
+          div(class="table-responsive")
+            table#tblMedRecord.table.table-hover.table-striped.table-bordered
+              thead(class="bg-primary" id="tblRecord")
+                  tr
+                      th #
+                      if Identity == 'Med'
+                        th 諮詢者
+                      th 諮詢原因
+                      th 醫院
+                      th 科別
+                      th 醫師
+                      th 看診時間
+                      th 操作
+              tbody(style="background-color:#fff")
+                - for(var i = 0; i < records.length; i++){
+                  tr
+                      td(scope='row', style="color:#000;") #{records[i].ID}
+                      if Identity == 'Med'
+                        td(style="color:#000;") #{records[i].Name}
+                      td 
+                        a(href=('/medicalrecord/update?id=' + records[i].ID)) #{records[i].Description}
+                      td(style="color:#000;") #{records[i].Clinic}
+                      td(style="color:#000;") #{records[i].CDvin}
+                      td(style="color:#000;") #{records[i].Doctor}
+                      td(style="color:#000;") #{records[i].ConsultationDate}
+                      td(style="color:#000;")
+                        if records[i].DoctorComment.length == 0
+                          input(class="btn btn-danger btn-xs" type="button" data-id=(records[i].ID) id=('delBtn_'+ i) value="刪除")
+                - }
