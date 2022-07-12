@@ -383,8 +383,10 @@ async function main(): Promise<void> {
                         return elem.CDvin == req.session.Division;
                     });
                 }
-                console.log(results);
+                //console.log("病歷資料");
+                //console.log(results);
                 var count = (results instanceof Array) && results != null ? results.length : 0;
+                //console.log("數量為:" + count);
                 var userTitle = req.session.Sex == "M" ? "先生" : "小姐";
                 res.render('index', { title: '醫療通', error: null, data:{ record_count: count , login_user: req.session.Name, user_title:userTitle }  });  
              }
@@ -398,7 +400,8 @@ async function main(): Promise<void> {
        });
 
         app.post('/checkPermission', function(req,res,next){
-            res.send(req.session.IsAdmin);
+            var obj = {IsAdmin : req.session.IsAdmin , Identity:req.session.Identity};
+            res.send(JSON.stringify(obj));
         });
         app.get('/catalog/medicalrecords', async function(req, res, next){
             if (!req.session.loggedin) {
@@ -1207,6 +1210,9 @@ async function main(): Promise<void> {
         app.get('/catalog/appointment', function(req, res, next){
             if (!req.session.loggedin) {
                 res.redirect('/login');
+            }
+            if(req.session.Identity != 'Normal'){
+                res.redirect('/catalog');
             }
             res.render('health_reports', { title: '預約看診', error: null, data:null  });
         }); 

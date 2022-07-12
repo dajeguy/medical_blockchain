@@ -46,10 +46,15 @@ html(lang='en' style="height:100%;")
       }
       $(document).ready(function(){
           $.post("/checkPermission", {}, function(res){
-            //console.log(res);
-            if(res != "T"){
-              $('#uploadlink').parent().remove();
-            }
+              //console.log(res);
+              var obj = JSON.parse(res);
+              if(obj.Identity != "Med" || obj.IsAdmin != "T"){
+                $('#hlnkUploadMedicalRecord').parent().remove();
+              }
+              if(obj.Identity != "Normal"){
+                $("#hlnkCreateMedicalRecord").parent().remove();
+                $('#hlnkAppointment').parent().remove();           
+              }
           });
       });
   body(style="height:100%;")
@@ -72,11 +77,11 @@ html(lang='en' style="height:100%;")
                 li 
                   hr
                 li 
-                  a(href='/medicalrecord/create') 填寫電子病歷
+                  a(href='/medicalrecord/create', id="hlnkCreateMedicalRecord") 填寫電子病歷
                 li 
-                  a(href='/catalog/appointment') 預約看診
+                  a(href='/catalog/appointment', id="hlnkAppointment") 預約看診
                 li
-                  a(onclick='uploadData()', id="uploadlink", href='#') 上傳醫院病歷至區塊鏈
+                  a(onclick='uploadData()', id="hlnkUploadMedicalRecord", href='#') 上傳醫院病歷至區塊鏈
                 li
                   br
                   button.btn.btn-primary(type='submit') 登出
