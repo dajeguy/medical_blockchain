@@ -54,122 +54,6 @@ async function main(): Promise<void> {
 
 
     try {
-        /*const client = await newGrpcConnection();
-
-        const gateway = connect({
-            client,
-            identity: await newIdentity(),
-            signer: await newSigner(),
-            // Default timeouts for different gRPC calls
-            evaluateOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
-            },
-            endorseOptions: () => {
-                return { deadline: Date.now() + 15000 }; // 15 seconds
-            },
-            submitOptions: () => {
-                return { deadline: Date.now() + 5000 }; // 5 seconds
-            },
-            commitStatusOptions: () => {
-                return { deadline: Date.now() + 60000 }; // 1 minute
-            },
-        });
-        // Get a network instance representing the channel where the smart contract is deployed.
-        var network = gateway.getNetwork(channelName);
-
-        // Get the smart contract from the network.
-        var contract = network.getContract(chaincodeName);
-
-        // Initialize a set of MedicalRecords data on the ledger using the chaincode 'InitLedger' function.
-        var option = new OptionModel();
-        console.log(option);
-        var triesCounter = 0;
-         while(triesCounter < 5)
-        {
-            console.log(`try #${triesCounter}`);
-            try 
-            {
-                var xx = await initLedger(contract);
-                console.log(xx);
-                break;  // 'return' would work here as well
-            } 
-            catch (err) {
-               console.log(err);
-            }
-            triesCounter ++;
-        }*/
-
-        // Return all the current MedicalRecords on the ledger.
-        //let triesCounter = 0;
-        /*var rcd = {
-              ID: 'record1656347223368',
-              PID: 'N123****32',
-              ClinicID: 'B0001',
-              JobType: '服務業-空服員',
-              Name: '王美麗',
-              Birth: '1987/07/20',
-              Sex: 'F',
-              Btp: 'A',
-              Address: '台北市台北市文山區興隆路三段30號',
-              Email: 'beauty@gmail.com',
-              Phone: '0912345678',
-              CDvin: '01',
-              CDVinID: '01',
-              Doctor: '62b4a715faaa5082f675b8b0',
-              Description: 'test',
-              Smoke: '是',
-              Drink: '是',
-              BeteNut: '是',
-              PotentialDise: '無',
-              Surgery: '是',
-              OTC: '是',
-              DrugSensitive: '是',
-              SleepSituation: '睡足7-8小時',
-              Travel: '是',
-              DoctorComment: ''
-            };
-        while(triesCounter < 5)
-        {
-            console.log(`try #${triesCounter}`)
-            try 
-            {
-                await uploadMedData(contract,rcd);
-                break;  // 'return' would work here as well
-            } 
-            catch (err) {
-               console.log(err);
-            }
-            triesCounter ++;
-        }*/
-
-
-        /*dotenv.config();
-
-        const app: Express = express();
-        const port = process.env.PORT;
-
-        app.get('/', (req: Request, res: Response) => {
-          res.send('Express + TypeScript Server');
-        });
-
-        app.listen(port, () => {
-          console.log(`[server]: Server is running at https://localhost:${port}`);
-        });*/
-        /*var triesCounter2 = 0;
-        while(triesCounter2 < 5)
-        {
-            console.log(`try #${triesCounter2}`)
-            try 
-            {
-                var re : any = await GetAllMedicalRecords(contract);
-                console.log(JSON.stringify(re, null, 4));
-                break;  // 'return' would work here as well
-            } 
-            catch (err) {
-               console.log(err);
-            }
-            triesCounter2 ++;
-        }*/
 
         const session = require('express-session');
         var createError = require('http-errors');
@@ -290,10 +174,10 @@ async function main(): Promise<void> {
                             ]
                         })
                       .toArray(function(err, result){
-                        console.log("查詢結果");
-                        console.log(result);
+                        //console.log("查詢結果");
+                        //console.log(result);
                         if(err){
-                            console.log(err);
+                            //console.log(err);
                             res.redirect('/login');
                         }
                         if(result.length > 0){
@@ -443,13 +327,13 @@ async function main(): Promise<void> {
             var tempVal = req.tempData.get('queryParameters');
             if (tempVal !=null)
                 queryParameters = JSON.parse(tempVal);
-                console.log("parse 後結果");
-                console.log(queryParameters);
+                //console.log("parse 後結果");
+                //console.log(queryParameters);
             try
              {
                 var result:any = await GetAllMedicalRecords(contract);
-                console.log("撈出所有病歷資料");
-                console.log(result);
+                //console.log("撈出所有病歷資料");
+                //console.log(result);
                 queryResult = (result instanceof Array) && result != null ? result : [];
                 if(req.session.Identity == 'Normal'){
                     queryResult = queryResult.filter(function(elem:any){
@@ -556,8 +440,8 @@ async function main(): Promise<void> {
             queryParameters.DivisionId = req.body.division;
             queryParameters.DoctorId = req.body.doctor;
             queryParameters.ConsultationDate = req.body.consultation_date;
-            console.log("裝好 tempdata");
-            console.log(JSON.stringify(queryParameters,null,4));
+            //console.log("裝好 tempdata");
+            //console.log(JSON.stringify(queryParameters,null,4));
             req.tempData.set("queryParameters", JSON.stringify(queryParameters));
             res.redirect("/catalog/medicalrecords");
 
@@ -729,17 +613,17 @@ async function main(): Promise<void> {
                                 console.log('query string 有誤');
                                 return;
                             }
-                            console.log(req.query.id);
+                            //console.log(req.query.id);
                             //console.log(req.body.doctorcomment);
                             var result:any = await ReadMedicalRecordByID(contract, req.query.id);
-                            console.log("更新表單時讀取的資料");
-                            console.log(JSON.stringify(result, null,4));
+                            //console.log("更新表單時讀取的資料");
+                            //console.log(JSON.stringify(result, null,4));
                             if(result === undefined || result == null){
                                 next(createError(404));
                             }
                             else{
-                                console.log("醫生診斷資料");
-                                console.log(req.body.doctorcomment);
+                                //console.log("醫生診斷資料");
+                                //console.log(req.body.doctorcomment);
                                 queryResult = result as MedicalRecord;
                                 personalData = {
                                     Name:queryResult.Name,
@@ -846,8 +730,8 @@ async function main(): Promise<void> {
                     console.log('create medical record get error:' + err);
                     return ;
                 }
-                console.log("診所");
-                console.log(results);
+                //console.log("診所");
+                //console.log(results);
                 //console.log(results.clinics);
                 //console.log(results.investigations);
 
@@ -880,8 +764,8 @@ async function main(): Promise<void> {
                  try
                  {
                     var result:any = await GetAllMedicalRecords(contract);
-                    console.log("新增表單時查詢是否有最近資料");
-                    console.log(JSON.stringify(result, null,4));
+                    //console.log("新增表單時查詢是否有最近資料");
+                    //console.log(JSON.stringify(result, null,4));
                     queryResult = (result instanceof Array) && result != null ? result : [];
                         if(queryResult.length > 0){
                         queryResult = queryResult.filter(function(elem:any){
@@ -889,8 +773,8 @@ async function main(): Promise<void> {
                         });
                         queryResult.sort(function(a, b){ return parseInt(b.ID.replace('record','')) - parseInt(a.ID.replace('record','')) });
                         latestMedicalRecord = queryResult[0];
-                        console.log("儲存結果");
-                        console.log(latestMedicalRecord);
+                        //console.log("儲存結果");
+                        //console.log(latestMedicalRecord);
                     }
                  }
                  catch(err){
@@ -1124,8 +1008,8 @@ async function main(): Promise<void> {
                  optionModel9.Comment = req.body.OP9_Comment && req.body.OP9_Comment != '' ?  req.body.OP9_Comment : "";
                  mRecord.Options.push(optionModel9);
                  
-                 console.log("準備要建立的資料");
-                 console.log(JSON.stringify(mRecord,null,4));
+                 //console.log("準備要建立的資料");
+                 //console.log(JSON.stringify(mRecord,null,4));
                  
                 var client = await newGrpcConnection();
 
