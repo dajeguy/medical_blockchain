@@ -30,7 +30,7 @@ The smart contract (in folder `chaincode-xyz`) implements the following function
 - DeleteMedicalRecord
 - GetAllMedicalRecords
 
-Note that the medicalRecord sharing implemented by the smart contract is a simplified scenario, without ownership validation, meant only to demonstrate how to invoke transactions.
+Note that the medicalRecord sharing implemented by the smart contract is a simplified scenario, without ownership validation, meant only to demonstrate how to invoke transactions, instead, the access permission control currently is implemented on the application side , not the blockchain side.
 
 ## Running the sample
 
